@@ -1,5 +1,7 @@
 ForestPPL is continue of project Forest.
+
 What's new:
+
 1.New ScopeManager to provide access to variables within functions, loops, and other block statements.
 2.New Producer-Consumer mechanism for efficient processing of commands entered via the console or read from files.
 3.Significantly improved performance through AST traversal enhancements.
