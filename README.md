@@ -22,3 +22,8 @@ What's new:
 
 10.Added HTML-format reference documentation.
 
+24/09/2026
+
+fixed bug - execution of command calc under checksyntax yes
+
+successfully porting ForestPPL from Windows to Linux undergoing verification
