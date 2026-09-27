@@ -1,0 +1,141 @@
+ForestPPL 2.0.0.3 for Linux (x86_64) — Installation
+=====================================================
+
+File: ForestPPL-2.0.0.3-linux-x86_64.run is a self-extracting
+installer. It contains only the ready-to-run program (no source code):
+the Forest interpreter, all plugins, CodeGen, examples, data and tests.
+It downloads nothing from the internet, needs no sudo to install,
+and needs no compiler or extra packages.
+
+
+1. Requirements
+---------------
+  • Linux x86_64 with glibc 2.38 or newer:
+      Ubuntu 24.04+, Debian 13+, Fedora 39+, Linux Mint 22+, etc.
+  • Windows: WSL2 with Ubuntu 24.04. To check the Ubuntu version in WSL:
+        lsb_release -a
+    If it shows 22.04 or older, install 24.04 (in PowerShell):
+        wsl --install -d Ubuntu-24.04
+  • Not supported: Ubuntu 22.04 and older (glibc 2.35), Alpine (musl), ARM.
+    The installer checks this itself and reports it with a clear message.
+
+To check your system without installing anything:
+    bash ForestPPL-2.0.0.3-linux-x86_64.run --check
+
+
+2. Installation
+---------------
+Copy the .run file into Linux (in WSL, for example, to your home folder):
+
+    cp /mnt/c/Users/<NAME>/Downloads/ForestPPL-2.0.0.3-linux-x86_64.run ~
+
+and run it:
+
+    cd ~
+    bash ForestPPL-2.0.0.3-linux-x86_64.run
+
+Running it with "bash ..." always works, even if the file lost its
+executable flag when copied from Windows (otherwise you need chmod +x).
+
+What happens:
+  • the system and the archive integrity (sha256) are checked;
+  • the program is unpacked into ~/ForestPPL;
+  • the commands forest and forest-codegen are added (links in ~/.local/bin);
+  • a short self-test runs: Forest starts and loads its plugins.
+
+A different folder:
+    bash ForestPPL-2.0.0.3-linux-x86_64.run --target ~/apps/ForestPPL
+
+Installing for all users (into /opt, commands into /usr/local/bin):
+    sudo bash ForestPPL-2.0.0.3-linux-x86_64.run --target /opt/ForestPPL
+  Note: Forest writes Log/, Log.txt and example files into its installation
+  folder, and /opt is writable only by root. For everyday work and tests,
+  a per-user installation in each home folder (the default) is more
+  convenient.
+
+All options:  bash ForestPPL-2.0.0.3-linux-x86_64.run --help
+
+
+3. If the forest command is not found
+-------------------------------------
+When ~/.local/bin is created for the first time, Ubuntu adds it to PATH
+only in a new terminal. Open a new terminal (or close and reopen the
+WSL window). If that does not help:
+
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+
+It also works without PATH:  ~/ForestPPL/forest
+
+
+4. Usage
+--------
+    forest                        interactive mode (to quit: exit)
+    forest myscript.scr           run a script from any folder;
+                                  a relative path to the script works
+    forest-codegen MyLib.cfg      generate a skeleton for a new plugin
+                                  (MyLib.h, MyLib.cpp) in the current folder;
+                                  sample config: ~/ForestPPL/CodeGen.Sample.cfg
+    ~/ForestPPL/RunAll.sh         run all examples/tests (like RunAll.bat);
+                                  results go to ~/ForestPPL/Log.txt
+
+Settings are in ~/ForestPPL/Configuration.data (same format as on
+Windows; paths such as Functions\CommonFunctions.ppl can be written
+as they are). During a run, RunAll.sh temporarily replaces it with
+Configuration.RunAll.data (all plugins enabled) and then restores yours.
+
+Important: as on Windows, Forest looks for Configuration.data, plugins
+(*.so) and Functions/ in its working folder. The forest command changes
+to ~/ForestPPL by itself, so paths inside scripts (Examples\..., Data\...)
+are resolved relative to ~/ForestPPL, not to the folder you started it
+from. Do not run ~/ForestPPL/Forest directly from another folder; use
+the forest command.
+
+
+5. What gets installed
+----------------------
+    Forest, forest              the interpreter and its launcher command
+    CodeGen, forest-codegen     the plugin generator
+    *.so                        PPL, StorageLib, SyntaxChecker,
+                                NotationTransformations and the plugins:
+                                Console, Convert, DataFrame, Dictionary,
+                                Directory, Erato, File, Math, Matrix, Queue,
+                                Random, Stack, String, Vector
+    lib/                        libstdc++ and libgcc_s from GCC 14 (bundled,
+                                so you do not need to install g++)
+    Configuration.data          settings
+    Functions/ Examples/ Data/  function library, examples, data
+    tests/                      test lists (.bat from Windows) for RunAll.sh
+    Log/                        logs (when Log = yes)
+    RunAll.sh, uninstall.sh, README.txt
+
+
+6. Updating
+-----------
+Run the installer of the new version the same way as the first time.
+The old folder is kept as ~/ForestPPL.bak-DATE. Your Configuration.data,
+Log/ and Log.txt are carried over to the new installation; if the
+default config changed in the new version, it is placed next to yours
+as Configuration.data.new. Your own scripts from the old folder stay in
+the .bak folder: move them over by hand, then delete the .bak folder.
+
+
+7. Uninstalling
+---------------
+    ~/ForestPPL/uninstall.sh
+
+Removes the whole ~/ForestPPL folder (including anything you put in it;
+it asks for confirmation) and the forest / forest-codegen commands.
+
+
+8. Troubleshooting
+------------------
+  • "glibc X is too old": the distribution is older than Ubuntu 24.04,
+    see section 1.
+  • "archive is corrupted": the file was damaged while downloading or
+    copying; download it again. Do not open the .run file in a text editor.
+  • Installing into /mnt/c/... (a Windows drive) works, but it is noticeably
+    slower and file names are not case-sensitive; the installer warns you.
+    A Linux home folder is recommended.
+  • To view the contents without installing:  bash ...run --list
+    To just unpack into a folder:              bash ...run --extract FOLDER
