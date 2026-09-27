@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ForestPPL</title>
+<meta name="description" content="ForestPPL: an interpreter for the Parenthesis Programming Language. Write it like C, run it like LISP. Quick start, language tour, libraries and commands.">
+<meta property="og:title" content="ForestPPL">
+<meta property="og:description" content="Write it like C, run it like LISP. Get started with the Parenthesis Programming Language.">
+<meta property="og:type" content="website">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --sunk:#E7ECE6; --line:#D3DBD2;
+  --ink:#15201A; --dim:#4E5E54; --faint:#7A887F;
+  --moss:#2E7349; --moss-soft:#DCEBE0;
+  --ppl:#A8620F; --ppl-soft:#F4E6D3;
+  --scr:#2A5A9E; --scr-soft:#DDE7F4;
+  --code-bg:#15201A; --code-ink:#DDE6DF; --code-dim:#7F9186;
+  --tok-str:#E7B872; --tok-kw:#8FC8A2; --tok-num:#9DBCE8; --tok-com:#6D7F74;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1411; --surface:#151D18; --sunk:#1B251F; --line:#2A362F;
+    --ink:#E3EAE5; --dim:#A7B5AC; --faint:#77867D;
+    --moss:#6FC38E; --moss-soft:#1D3326;
+    --ppl:#E0A054; --ppl-soft:#33261A;
+    --scr:#79A6E8; --scr-soft:#1B2638;
+    --code-bg:#0A0F0C; --code-ink:#DDE6DF; --code-dim:#7F9186;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1411; --surface:#151D18; --sunk:#1B251F; --line:#2A362F;
+  --ink:#E3EAE5; --dim:#A7B5AC; --faint:#77867D;
+  --moss:#6FC38E; --moss-soft:#1D3326;
+  --ppl:#E0A054; --ppl-soft:#33261A;
+  --scr:#79A6E8; --scr-soft:#1B2638;
+  --code-bg:#0A0F0C; --code-ink:#DDE6DF; --code-dim:#7F9186;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding:0 20px}
+a{color:var(--moss);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--moss);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:19px;font-weight:700}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.9em}
+p code,li code,td code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.lede{color:var(--dim);max-width:62ch}
+
+/* nav */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -20px;padding:0 20px}
+nav.top .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.brand{font-family:var(--display);font-weight:800;font-size:20px;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand .paren{font-family:var(--mono);color:var(--moss);font-weight:500}
+nav.top ul{display:flex;gap:18px;list-style:none;margin:0 0 0 auto;padding:0}
+nav.top ul a{color:var(--dim);text-decoration:none;font-size:14px}
+nav.top ul a:hover{color:var(--ink)}
+@media (max-width:720px){nav.top ul li:not(.keep){display:none}}
+
+/* hero */
+.hero{padding-block:56px 40px;display:grid;gap:36px}
+.hero h1{font-size:clamp(44px,8vw,88px);font-weight:800;letter-spacing:-.03em}
+.hero h1 .p{font-family:var(--mono);font-weight:400;color:var(--moss);font-size:.7em;vertical-align:.08em}
+.hero .tag{font-size:clamp(18px,2.2vw,22px);color:var(--dim);max-width:44ch;margin-top:16px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.btn:hover{border-color:var(--moss)}
+.btn.primary{background:var(--moss);border-color:var(--moss);color:var(--bg)}
+.btn small{font-weight:400;opacity:.8;font-family:var(--mono);font-size:12px}
+
+.dual{display:grid;grid-template-columns:1fr auto 1fr auto .6fr;gap:0;align-items:stretch;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--code-bg)}
+.pane{padding:16px 18px;min-width:0}
+.pane .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.pane .lbl i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.pane pre{margin:0;overflow-x:auto}
+.pane code{font-size:13px;line-height:1.6;color:var(--code-ink);white-space:pre}
+.l-scr{color:#8FB5EC}.l-scr i{background:#8FB5EC}
+.l-ppl{color:#E7B872}.l-ppl i{background:#E7B872}
+.l-out{color:#8FC8A2}.l-out i{background:#8FC8A2}
+.arrow{display:flex;align-items:center;justify-content:center;color:var(--code-dim);font-family:var(--mono);font-size:11px;writing-mode:vertical-rl;padding:0 6px;border-left:1px dashed #2F3C34;border-right:1px dashed #2F3C34;letter-spacing:.1em}
+.dual-cap{font-size:14px;color:var(--faint);margin-top:10px}
+@media (max-width:860px){
+  .dual{grid-template-columns:1fr}
+  .arrow{writing-mode:horizontal-tb;padding:6px;border:none;border-top:1px dashed #2F3C34;border-bottom:1px dashed #2F3C34}
+}
+
+section{padding-block:64px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:12px;margin-bottom:32px}
+
+/* facts strip */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.facts div{background:var(--surface);padding:16px 18px}
+.facts b{display:block;font-family:var(--display);font-size:17px;margin-bottom:4px}
+.facts span{color:var(--dim);font-size:14px}
+@media (max-width:760px){.facts{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.facts{grid-template-columns:1fr}}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:48px 1fr;gap:16px;padding-block:20px;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:none}
+.steps li::before{counter-increment:s;content:counter(s);font-family:var(--display);font-weight:800;font-size:28px;color:var(--moss);line-height:1}
+.steps .body{display:grid;gap:8px;min-width:0}
+.steps p{color:var(--dim)}
+
+.code{position:relative;background:var(--code-bg);border-radius:8px;min-width:0}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto}
+.code code{color:var(--code-ink);font-size:13px;line-height:1.6;white-space:pre}
+.code .copy{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;background:#23302A;color:var(--code-ink);border:1px solid #33443A;border-radius:5px;padding:3px 8px;cursor:pointer;opacity:.85}
+.code .copy:hover{opacity:1}
+.code .badge{position:absolute;top:-9px;left:12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border-radius:4px}
+.badge.scr{background:var(--scr-soft);color:var(--scr)}
+.badge.ppl{background:var(--ppl-soft);color:var(--ppl)}
+.badge.out{background:var(--moss-soft);color:var(--moss)}
+.t-s{color:var(--tok-str)}.t-k{color:var(--tok-kw)}.t-n{color:var(--tok-num)}.t-c{color:var(--tok-com);font-style:italic}.t-p{color:var(--code-dim)}
+
+/* tour */
+.tour{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:start}
+.tabs{display:flex;flex-direction:column;gap:2px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px)}
+.tabs button{all:unset;cursor:pointer;padding:9px 12px;border-radius:7px;color:var(--dim);font-size:15px;display:flex;justify-content:space-between;gap:8px}
+.tabs button:hover{background:var(--sunk);color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--moss-soft);color:var(--moss);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--moss)}
+.tabs .k{font-family:var(--mono);font-size:12px;opacity:.7}
+.panel{display:grid;gap:18px;min-width:0}
+.panel p{color:var(--dim);max-width:65ch}
+.panel .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:8px}
+.panel .pair > *{min-width:0}
+@media (max-width:860px){
+  .tour{grid-template-columns:1fr}
+  .tabs{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .tabs button{white-space:nowrap}
+  .tabs .k{display:none}
+  .panel .pair{grid-template-columns:1fr}
+}
+.note{font-size:14px;color:var(--dim);border-left:3px solid var(--ppl);padding:4px 0 4px 12px;max-width:65ch}
+
+/* trees */
+.trees{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+.tree-list{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.tree-list li{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:baseline}
+.tree-list b{font-family:var(--mono);font-size:14px;color:var(--moss);font-weight:500}
+.tree-list span{color:var(--dim);font-size:15px}
+@media (max-width:860px){.trees{grid-template-columns:1fr}.tree-list li{grid-template-columns:1fr;gap:2px}}
+
+/* libs */
+.libs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.lib{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.lib header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lib h3{font-family:var(--mono);font-size:15px;font-weight:500}
+.lib .n{font-family:var(--mono);font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.lib p{font-size:14px;color:var(--dim)}
+.lib .fns{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.5}
+.lib.default{border-color:color-mix(in srgb,var(--moss) 45%,var(--line))}
+.lib .def{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--moss)}
+
+/* cheat */
+.cheat-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.cheat-bar input{flex:1 1 240px;max-width:360px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px}
+.cheat-bar span{font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500;background:var(--sunk)}
+td:first-child{font-family:var(--mono);white-space:nowrap;color:var(--ink)}
+td:nth-child(2){color:var(--faint);font-size:12px;font-family:var(--mono)}
+td:last-child{color:var(--dim)}
+
+/* status */
+.status{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.plat{display:grid;gap:10px}
+.plat div{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.pill{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:var(--moss-soft);color:var(--moss)}
+.pill.wip{background:var(--ppl-soft);color:var(--ppl)}
+.news{margin:0;padding-left:20px;color:var(--dim);display:grid;gap:6px;font-size:15px}
+@media (max-width:760px){.status{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);padding-block:32px 48px;color:var(--faint);font-size:14px;display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+footer a{color:var(--dim)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+
+.community{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}
+.ways{display:grid;gap:10px}
+.way{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.way b{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--moss)}
+.way span{color:var(--dim);font-size:15px}
+@media (max-width:760px){.community{grid-template-columns:1fr}.way{grid-template-columns:1fr;gap:2px}}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<nav class="top"><div class="wrap">
+  <a class="brand" href="#top"><span class="paren">(</span>ForestPPL<span class="paren">)</span></a>
+  <ul>
+    <li><a href="#start">Get started</a></li>
+    <li><a href="#tour">Language</a></li>
+    <li><a href="#trees">Trees</a></li>
+    <li><a href="#libs">Libraries</a></li>
+    <li><a href="#cheat">Commands</a></li>
+    <li><a href="#community">Community</a></li>
+    <li class="keep"><a href="https://github.com/okogosov/ForestPPL">GitHub</a></li>
+  </ul>
+</div></nav>
+
+<main class="wrap" id="top">
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">Future Oriented Rapid Execution Smart Tools · Parenthesis Programming Language</div>
+    <h1>Forest<span class="p">(</span>PPL<span class="p">)</span></h1>
+    <p class="tag">Write it like C, run it like LISP. Every program is a tree you can display, save, rebuild and change while it runs.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/okogosov/ForestPPL/raw/main/ForestPPL_SFX.exe">Download for Windows <small>SFX.exe</small></a>
+      <a class="btn" href="reference.html">Reference <small>HTML</small></a>
+      <a class="btn" href="https://github.com/okogosov/ForestPPL/blob/main/Tutorial%20ForestPPL.pdf">Tutorial <small>PDF</small></a>
+    </div>
+  </div>
+
+  <div>
+    <div class="dual" aria-label="The same loop in two notations">
+      <div class="pane">
+        <div class="lbl l-scr"><i></i>for.scr — what you write</div>
+<pre><code class="hl">var begin = 0;
+var end = 3;
+for(i, begin + 1, end + 1, 1)
+{
+  write(i);
+}</code></pre>
+      </div>
+      <div class="arrow">preprocessor →</div>
+      <div class="pane">
+        <div class="lbl l-ppl"><i></i>ppl — what runs</div>
+<pre><code class="hl">var (begin[0]);
+var (end[3]);
+loop (i)( + ( begin )( 1 ) )( + ( end )( 1 ) )( 1 )
+(
+  do
+  (
+    (write(i))
+  )
+);</code></pre>
+      </div>
+      <div class="arrow">run →</div>
+      <div class="pane">
+        <div class="lbl l-out"><i></i>output</div>
+<pre><code>1
+2
+3</code></pre>
+      </div>
+    </div>
+    <p class="dual-cap">Infix <code>.scr</code> code is translated into parenthesized <code>.ppl</code>, then a syntax tree is built and traversed. Run <code>showcode yes</code> to see this translation for any of your own files.</p>
+  </div>
+
+  <div class="facts">
+    <div><b>Two notations</b><span>C-like scr and prefix ppl, freely mixed in one file</span></div>
+    <div><b>No dependencies</b><span>Plain C++ console app, core engine in PPL.DLL</span></div>
+    <div><b>14 libraries</b><span>From Math and String to DataFrame and StorageLib</span></div>
+    <div><b>MIT</b><span>Open source, VS Code extension included</span></div>
+  </div>
+</header>
+
+<section id="start">
+  <div class="sec-head">
+    <div class="eyebrow">Your first ten minutes</div>
+    <h2>From download to your first program</h2>
+  </div>
+  <ol class="steps">
+    <li><div class="body">
+      <h3>Download and unpack</h3>
+      <p>Download <code>ForestPPL_SFX.exe</code> from the repository and run it; it is a self-extracting archive. You get <code>ForestPPL.exe</code>, the library DLLs, <code>Configuration.data</code> and the folders <code>Data</code>, <code>Examples</code>, <code>Functions</code> and <code>CodeGen</code>.</p>
+    </div></li>
+    <li><div class="body">
+      <h3>Start the interactive console</h3>
+      <p>With no arguments the interpreter waits for commands at the <code>&gt;</code> prompt. Switch to the C-like notation with <code>code scr</code>.</p>
+      <div class="code"><span class="badge out">console</span><pre><code class="hl">&gt;ForestPPL.exe
+&gt;code scr;
+&gt;write("Hello World!");
+Hello World!
+&gt;help            // or ?, lists all commands
+&gt;? d             // help for a single command</code></pre></div>
+    </div></li>
+    <li><div class="body">
+      <h3>Run a bundled example</h3>
+      <p><code>readcode</code> (short form <code>rc</code>) reads and runs a file. Start with the cowsay series: each file adds one language feature to the previous one. Values after the file name replace <code>$1$</code>, <code>$2$</code>, <code>$3$</code> in the script.</p>
+      <div class="code"><span class="badge out">console</span><pre><code class="hl">&gt;rc examples\cowsay\cowsay1.scr
+&gt;rc examples\cowsay\cowsay4.scr 1 1 10</code></pre></div>
+    </div></li>
+    <li><div class="body">
+      <h3>Write your own file</h3>
+      <p>Save this as <code>lines.scr</code> and run it outside the console. The notation is chosen by the file extension.</p>
+      <div class="code"><span class="badge scr">lines.scr</span><pre><code class="hl">var n = $1$;
+for(i, 0, n)
+{
+    write#("line {0} of {1}", i + 1, n);
+}</code></pre></div>
+      <div class="code"><span class="badge out">terminal</span><pre><code class="hl">ForestPPL.exe lines.scr 3</code></pre></div>
+    </div></li>
+    <li><div class="body">
+      <h3>Turn on checking and highlighting</h3>
+      <p><code>checksyntax yes</code> reports syntax errors before anything runs. The VS Code extension ships in the repository and installs with one command.</p>
+      <div class="code"><span class="badge out">terminal</span><pre><code class="hl">code --install-extension forestppl-vscode-0.3.0.vsix</code></pre></div>
+    </div></li>
+  </ol>
+</section>
+
+<section id="tour">
+  <div class="sec-head">
+    <div class="eyebrow">A short tour</div>
+    <h2>The essentials on one page</h2>
+    <p class="lede">Examples come from the tutorial. Where the difference helps, the ppl form of the same construct sits next to the scr form.</p>
+  </div>
+  <div class="tour">
+    <div class="tabs" role="tablist" aria-label="Language topics">
+      <button role="tab" id="t-vars" aria-selected="true" aria-controls="p-vars">Variables <span class="k">var</span></button>
+      <button role="tab" id="t-flow" aria-selected="false" aria-controls="p-flow">Control flow <span class="k">if for</span></button>
+      <button role="tab" id="t-fn" aria-selected="false" aria-controls="p-fn">Functions <span class="k">function</span></button>
+      <button role="tab" id="t-node" aria-selected="false" aria-controls="p-node">Nodes &amp; access <span class="k">createnode</span></button>
+      <button role="tab" id="t-stor" aria-selected="false" aria-controls="p-stor">Storage <span class="k">s[i,j]</span></button>
+      <button role="tab" id="t-lib" aria-selected="false" aria-controls="p-lib">Libraries <span class="k">import</span></button>
+      <button role="tab" id="t-eval" aria-selected="false" aria-controls="p-eval">eval &amp; debugging <span class="k">eval</span></button>
+    </div>
+
+    <div>
+    <div class="panel" role="tabpanel" id="p-vars" aria-labelledby="t-vars">
+      <h3>Variables, constants, arrays</h3>
+      <p>Every value is stored as a Unicode string: <code>5.2</code> is kept as <code>"5.2"</code>, booleans as <code>"True"</code> and <code>"False"</code>. A leading underscore makes a name private. The names <code>result</code> and <code>all</code> are reserved.</p>
+      <div class="pair">
+        <div class="code"><span class="badge scr">scr</span><pre><code class="hl">var x = 0;
+x = 1 + 2;              // "set" may be omitted
+const PI2 = 6.28;
+array y[3];
+y[x - 1] = 2 + 3;
+array colors[] = {"Red", "Green"};
+writearray colors row;</code></pre></div>
+        <div class="code"><span class="badge ppl">ppl</span><pre><code class="hl">var (x [0]);
+set (x) (+(1)(2));
+array (y[3]);
+set (y[+(1)(2)]) (0);
+set (x) ( -(0)(+(3)(2)) );  // x = -(3+2)</code></pre></div>
+      </div>
+      <p class="note">Declaring a name twice fails with <code>name [x] already exists</code>. Delete it with <code>del x</code>, or allow redeclaration with <code>recreate yes</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-flow" aria-labelledby="t-flow" hidden>
+      <h3>Conditions and loops</h3>
+      <p><code>for(i, start, end[, step])</code> becomes a ppl <code>loop … do</code> block. Braces around an <code>if</code> or <code>for</code> body may be dropped when it holds one simple statement. With nested <code>if</code>s, keep the braces on the outer one.</p>
+      <div class="pair">
+        <div class="code"><span class="badge scr">scr</span><pre><code class="hl">for(i, 0, 3)
+{
+  if (i == 0)
+  {
+     write#("i == 0");
+     continue;
+  }
+  else
+    write#("i != 0 = {0}", i);
+}
+x = 1 == 1 ? t : f;</code></pre></div>
+        <div class="code"><span class="badge ppl">ppl</span><pre><code class="hl">loop (i)(0)(3)(1)
+(
+   do
+   (
+     (write(hello))
+     (write(world))
+   )
+);</code></pre></div>
+      </div>
+      <p>Also available: <code>switch</code> / <code>case</code> / <code>default</code>, <code>break</code>, <code>continue</code> and <code>setloopend</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-fn" aria-labelledby="t-fn" hidden>
+      <h3>Functions</h3>
+      <p>A program runs top to bottom; there is no <code>main</code>. Results come back through parameters. Local variables live in the <code>Local</code> tree and are removed when the function returns.</p>
+      <div class="pair">
+        <div class="code"><span class="badge scr">scr</span><pre><code class="hl">function f(a, b, c, q)
+{
+  q = a + b + c;
+}
+var res;
+call f(1, 2, 3, res);
+write#("res={0}", res);   // res=6
+
+sumdata string;
+call f(1, 2, 3, res);
+write#("res={0}", res);   // res=123</code></pre></div>
+        <div class="code"><span class="badge ppl">ppl</span><pre><code class="hl">createnode Functions.Calc;
+function
+(
+  Functions.Calc.Sum(result1)(n1)(n2)
+  (
+     (set(result1)(+(n1) (n2)))
+  )
+);</code></pre></div>
+      </div>
+      <p>Parameters can be typed (<code>array: arr</code>, <code>storage: stor</code>). Functions support <code>finally</code> and <code>failure</code> blocks, plus delegates and callbacks: <code>delegate</code>, <code>dlgtcall</code>, <code>callback</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-node" aria-labelledby="t-node" hidden>
+      <h3>Nodes, public and private</h3>
+      <p>A node groups data and functions under one name. Anything starting with <code>_</code> is visible only to functions of its own node.</p>
+      <div class="code"><span class="badge scr">scr</span><pre><code class="hl">createnode N1;
+var N1.x  = "public var N1.x";
+var N1._x = "private var N1._x";
+
+function N1._f()    // private
+{
+    write(N1.x);
+    write(N1._x);
+}
+function N1.f()     // public
+{
+   N1._f();
+}
+N1.f();
+write(N1._x);   // Error: [GetValue] [N1._x] private object, no access</code></pre></div>
+      <p>Give a long name a short alias with <code>using x = xxxxx</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-stor" aria-labelledby="t-stor" hidden>
+      <h3>Storage: multidimensional and jagged arrays</h3>
+      <p>Storage holds data of any dimension, including rows of different lengths. Work with it through <code>sget</code>, <code>sset</code>, <code>swrite</code>, <code>sinfo</code>, <code>sresize</code> and the <code>StorageLib</code> library, which adds sorting, median, <code>Unique</code> and <code>Shuffle</code>.</p>
+      <div class="pair">
+        <div class="code"><span class="badge scr">scr</span><pre><code class="hl">storage s[2,2];
+s[0,0] = "left top";
+s[0,1] = s[0,0];</code></pre></div>
+        <div class="code"><span class="badge ppl">ppl</span><pre><code class="hl">storage (stor)(2)(2)
+sset (stor)(0)(0)("var (x)(0);d")
+eval (sget(stor)(0)(0))</code></pre></div>
+      </div>
+      <p>Save data to disk and restore it with <code>savedata</code> and <code>readdata</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-lib" aria-labelledby="t-lib" hidden>
+      <h3>Libraries</h3>
+      <p>The <code>Main</code> library is always loaded. Others come in with <code>import</code> or through <code>UserImportN</code> lines in <code>Configuration.data</code>. Build your own extension as a DLL with <code>CodeGen.exe</code>.</p>
+      <div class="code"><span class="badge scr">colors.scr</span><pre><code class="hl">import Console;
+import String;
+
+var text = "##Hello World!##";
+array colors[] = {"Black","DarkBlue","DarkGreen","DarkCyan",
+                  "DarkRed","DarkMagenta","DarkYellow","Gray",
+                  "DarkGray","Blue","Green","Cyan",
+                  "Red","Magenta","Yellow","White"};
+array ArrayChars;
+call String.ToCharArray(text, ArrayChars);
+for(i, 0, length(text))
+{
+    Console.ForegroundColor(colors[i]);
+    Console.Write(ArrayChars[i]);
+}
+Console.DefaultColors();</code></pre></div>
+      <p>Help for a library: <code>Math.help</code>. Help for one function: <code>Math.help(Sinh)</code>. Loaded libraries: <code>importlist</code>.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-eval" aria-labelledby="t-eval" hidden>
+      <h3>eval, debugging, timing</h3>
+      <p>A script can build ppl code as a string and run it immediately. That lets you change variables and logic at runtime without restarting the engine.</p>
+      <div class="code"><span class="badge ppl">ppl</span><pre><code class="hl">&gt;var x = "var(r); set(r)(/(180)(Math.PI())); write(r);";
+&gt;eval(x);
+57.29577951308232
+&gt;write(eval("+(1)(2)"))
+3</code></pre></div>
+      <div class="code"><span class="badge scr">scr</span><pre><code class="hl">start;
+array x[10];
+for(i, 0, length(x))
+{
+   x[i] = i;
+}
+writearray x row;
+stop("test duration:");   // test duration: 0.7918 msec</code></pre></div>
+      <p>To see what your program does: <code>dstree</code> prints the syntax tree of every statement, <code>printscope</code> shows the scope stack, <code>traceppl yes</code> traces execution, and <code>suspend</code> pauses a script so you can type commands by hand.</p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section id="trees">
+  <div class="sec-head">
+    <div class="eyebrow">Why Forest</div>
+    <h2>Code and data live in trees</h2>
+    <p class="lede">The <code>d</code> (display) command shows what is in memory at any moment: nodes <code>N</code> and leaves <code>L</code>. It is the main tool for understanding the language.</p>
+  </div>
+  <div class="trees">
+    <ul class="tree-list">
+      <li><b>Global</b><span>Public variables, arrays, storage and nodes, shared by all code.</span></li>
+      <li><b>Local</b><span>Variables of the running function, removed when it returns.</span></li>
+      <li><b>Functions</b><span>Functions only, no data. Loaded by default from <code>Functions\CommonFunctions.ppl</code>.</span></li>
+      <li><b>Configuration</b><span>Settings from <code>Configuration.data</code>: code mode, logging, debugging, auto-loaded libraries.</span></li>
+      <li><b>Scope Manager</b><span>Tracks scopes: block variables disappear with their block, so nothing leaks.</span></li>
+    </ul>
+    <div class="code"><span class="badge out">&gt;d</span><pre><code>&gt;code scr
+&gt;array y[] = {1,2,3};
+&gt;var x = 0;
+&gt;d
+-N2     NS
+---N3   Global
+-----L0 empty     (const)
+-----N4 y                  [Array 3]
+-------L0       #       [1]
+-------L1       #       [2]
+-------L2       #       [3]
+-----L1 x                  [0]
+---N3   Local</code></pre></div>
+  </div>
+</section>
+
+<section id="libs">
+  <div class="sec-head">
+    <div class="eyebrow">Standard libraries</div>
+    <h2>What ships in the box</h2>
+    <p class="lede">The number on each card is how many functions the reference documents. Highlighted libraries load by default with the shipped <code>Configuration.data</code>.</p>
+  </div>
+  <div class="libs" id="libgrid"></div>
+</section>
+
+<section id="cheat">
+  <div class="sec-head">
+    <div class="eyebrow">Cheat sheet</div>
+    <h2>Console commands</h2>
+    <p class="lede">The service and special commands you will use in your first week. The reference has the full list with examples.</p>
+  </div>
+  <div class="cheat-bar">
+    <label for="q" class="eyebrow">Search</label>
+    <input id="q" type="search" placeholder="e.g. rc, eval, storage" autocomplete="off">
+    <span id="qcount"></span>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Command</th><th>Group</th><th>What it does</th></tr></thead>
+    <tbody id="cheatbody"></tbody>
+  </table></div>
+</section>
+
+<section id="status">
+  <div class="sec-head">
+    <div class="eyebrow">Project status</div>
+    <h2>Platforms and recent changes</h2>
+  </div>
+  <div class="status">
+    <div class="plat">
+      <div><span class="pill ok">ready</span><span><b>Windows</b> — primary platform, built with MS Developer Studio</span></div>
+      <div><span class="pill wip">verifying</span><span><b>Linux</b> — port complete, being verified against the test scripts</span></div>
+      <div><span class="pill ok">0.3.0</span><span><b>VS Code</b> — extension for .scr and .ppl files</span></div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:12px">New in ForestPPL</h3>
+      <ul class="news">
+        <li>Scope Manager for variables in functions, loops and blocks</li>
+        <li>Producer–consumer pipeline for commands from the console and files</li>
+        <li>Much faster AST traversal</li>
+        <li>New Storage with jagged arrays, plus the StorageLib library</li>
+        <li>Syntax checking before execution with <code>checksyntax</code></li>
+        <li>No more limits on index calculation and parameter passing</li>
+        <li>New API for external libraries and an HTML reference</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="community">
+  <div class="sec-head">
+    <div class="eyebrow">Community</div>
+    <h2>Questions, ideas, collaboration</h2>
+    <p class="lede">All conversation about ForestPPL happens in GitHub Discussions. Post there when you get stuck, want to build something together, or have an idea for the language.</p>
+  </div>
+  <div class="community">
+    <div class="ways">
+      <div class="way"><b>Q&amp;A</b><span>How do I do X? Why does this script behave this way? Include the code and the output you see.</span></div>
+      <div class="way"><b>Ideas</b><span>New commands, libraries or syntax you would like in PPL, and the problem they solve.</span></div>
+      <div class="way"><b>Collaboration</b><span>Porting, writing libraries with CodeGen, examples, documentation, or using PPL.DLL in your own application.</span></div>
+      <div class="way"><b>Show and tell</b><span>Share scripts and libraries you have built with ForestPPL.</span></div>
+    </div>
+    <div class="plat">
+      <a class="btn primary" href="https://github.com/okogosov/ForestPPL/discussions">Open GitHub Discussions</a>
+      <p class="lede" style="font-size:15px">Found a reproducible bug? File it under <a href="https://github.com/okogosov/ForestPPL/issues">Issues</a> with the script, the command you ran and the error text.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>ForestPPL · Oscar Kogosov · MIT License</span>
+  <span><a href="https://github.com/okogosov/ForestPPL">Repository</a> · <a href="https://github.com/okogosov/ForestPPL/discussions">Discussions</a> · <a href="https://github.com/okogosov/ForestPPL/issues">Issues</a></span>
+</footer>
+</main>
+
+<script>
+(function(){
+  const tabs=[...document.querySelectorAll('[role="tab"]')];
+  function select(t){
+    tabs.forEach(b=>{const on=b===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;document.getElementById(b.getAttribute('aria-controls')).hidden=!on;});
+  }
+  tabs.forEach((t,i)=>{
+    t.addEventListener('click',()=>select(t));
+    t.addEventListener('keydown',e=>{
+      const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];
+      if(d){e.preventDefault();const n=tabs[(i+d+tabs.length)%tabs.length];select(n);n.focus();}
+    });
+  });
+  select(tabs[0]);
+
+  const libs=[
+    ["Math",28,"Trigonometry, powers, logarithms, rounding, PI and E.","Sqrt Pow Round Sin Log DivRem",1],
+    ["String",18,"Search, replace, split and format strings, parse CSV.","Split SplitCsv Replace Format",1],
+    ["Console",11,"Text and background colors, cursor position, beep.","ForegroundColor SetCursorPosition",1],
+    ["File",6,"Read and write text whole or line by line.","ReadAllText WriteAllLines Exists",1],
+    ["Directory",8,"List, create and delete folders, get and set the current one.","GetFiles CreateDirectory",1],
+    ["Convert",8,"Convert between int, hex and binary; strings to number arrays.","IntToHex BinToInt",0],
+    ["Random",6,"Mersenne Twister generator, including straight into an array.","Next NextToArray",0],
+    ["Stack",11,"Stack with Push, Pop, Peek and export to an array.","Push Pop Peek ToArray",0],
+    ["Queue",11,"Queue with Enqueue, Dequeue, Peek and loading from an array.","Enqueue Dequeue AddArray",0],
+    ["Dictionary",13,"Hash map backed by std::unordered_map.","Add GetValue ContainsKey",0],
+    ["Vector",10,"Fast one-dimensional typed vectors.","Create Get Set Sort",0],
+    ["Matrix",11,"Fast two-dimensional typed matrices with rotate and sort.","AddArrayToRow Rotate",0],
+    ["DataFrame",40,"Table with named columns: select, sort, read and save.","SelectRows Sort ReadFile Save",0],
+    ["StorageLib",31,"Operations on storage: statistics, search, Join/Split, Unique, Shuffle.","Median Unique Join Sort",0]
+  ];
+  document.getElementById('libgrid').innerHTML=libs.map(([n,c,d,f,def])=>`<article class="lib${def?' default':''}"><header><h3>${n}</h3><span class="n">${c}</span></header>${def?'<span class="def">loaded by default</span>':''}<p>${d}</p><div class="fns">${f.split(' ').join(' · ')}</div></article>`).join('');
+
+  const cmds=[
+    ["help | ?","service","List commands, or show one command's format: ? d"],
+    ["code scr | ppl","service","Notation for console input; ppl by default"],
+    ["readcode | rc file [args]","service","Read and run a .scr or .ppl file; args replace $1$, $2$…"],
+    ["createpplcode | cpc","service","Save the ppl translation of a .scr file"],
+    ["showcode yes | no","service","Print the generated ppl code during rc"],
+    ["display | d [node]","service","Show a tree: Global, Local, Functions, Configuration"],
+    ["displaynodes | dn","service","Show nodes only"],
+    ["dstree","service","Syntax tree of every statement (from a script)"],
+    ["printscope","service","Scope Manager state and context stack"],
+    ["checksyntax yes | no","service","Check syntax before execution"],
+    ["debugppl | dbg yes | no","service","Report data creation and deletion, operation timing"],
+    ["traceppl yes | no","service","Trace commands and function calls"],
+    ["suspend / resume","service","Pause a script for manual commands, then continue"],
+    ["start / stop(text)","service","Measure execution time in milliseconds"],
+    ["recreate yes | no","service","Allow variables to be declared again"],
+    ["sumdata digit | string","service","Add numbers or concatenate strings"],
+    ["using short = long","service","Short alias for a long name"],
+    ["log yes | no","service","Write commands and results to the Log folder"],
+    ["shell(cmd)","service","Run an OS command and return its output"],
+    ["init","service","Delete all data and functions, start over"],
+    ["exit | exit()","service","Leave the interpreter, or leave a script"],
+    ["import Lib","special","Load a library or your own DLL"],
+    ["importlist | il","special","List loaded libraries"],
+    ["eval(\"ppl\")","special","Run ppl code from a string or variable"],
+    ["calc expression","special","Evaluate an infix expression (console only)"],
+    ["length(x)","special","Length of a string, array or storage"],
+    ["isexist(name)","special","Whether a variable, array or node exists"],
+    ["isdigits / isinteger","special","Check whether a value is a number or an integer"],
+    ["del name | del all","special","Delete an object, or everything in Global"],
+    ["gettoken(s)(sep)(n)","special","n-th token of a string, or the token count"],
+    ["getbykey / getbyvalue","special","Look up key–value pairs in an array"],
+    ["sleep(msec)","special","Pause for milliseconds"],
+    ["savedata / readdata","data","Save and restore data on disk"],
+    ["createnode N","nodes","Create a node for data or functions"],
+    ["definestruct / createstruct","nodes","Define and create structures"]
+  ];
+  const tb=document.getElementById('cheatbody'),q=document.getElementById('q'),qc=document.getElementById('qcount');
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  function draw(){
+    const v=q.value.trim().toLowerCase();
+    const rows=cmds.filter(r=>!v||r.join(' ').toLowerCase().includes(v));
+    tb.innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${r[1]}</td><td>${esc(r[2])}</td></tr>`).join('')||'<tr><td colspan="3">No matches. Try part of a command name.</td></tr>';
+    qc.textContent=`${rows.length} of ${cmds.length}`;
+  }
+  q.addEventListener('input',draw);draw();
+
+  const KW=/^(var|const|array|storage|set|setkvp|if|else|for|loop|do|switch|case|default|break|continue|function|call|return|import|write#?|writearray|createnode|del|eval|length|using|code|rc|readcode|sumdata|start|stop|sset|sget|True|False)$/;
+  function hl(src){
+    const re=/(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|(\b\d+(?:\.\d+)?\b)|([A-Za-z_][\w]*#?)|([()\[\]{}])|([\s\S])/g;
+    let out='',m;
+    while((m=re.exec(src))){
+      if(m[1])out+=`<span class="t-c">${esc(m[1])}</span>`;
+      else if(m[2])out+=`<span class="t-s">${esc(m[2])}</span>`;
+      else if(m[3])out+=`<span class="t-n">${m[3]}</span>`;
+      else if(m[4])out+=KW.test(m[4])?`<span class="t-k">${esc(m[4])}</span>`:esc(m[4]);
+      else if(m[5])out+=`<span class="t-p">${m[5]}</span>`;
+      else out+=esc(m[6]);
+    }
+    return out;
+  }
+  document.querySelectorAll('code.hl').forEach(c=>{c.innerHTML=hl(c.textContent);});
+
+  document.querySelectorAll('.code').forEach(box=>{
+    const b=document.createElement('button');b.className='copy';b.type='button';b.textContent='copy';
+    const code=box.querySelector('code');
+    function sel(){const r=document.createRange();r.selectNodeContents(code);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected';}
+    b.addEventListener('click',()=>{
+      const done=()=>{b.textContent='copied';setTimeout(()=>b.textContent='copy',1400);};
+      try{navigator.clipboard.writeText(code.textContent).then(done,sel);}catch(e){sel();}
+    });
+    box.appendChild(b);
+  });
+})();
+</script>
+
+</body>
+</html>
