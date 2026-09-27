@@ -27,3 +27,14 @@ What's new:
 fixed bug - execution of command calc under checksyntax yes
 
 successfully porting ForestPPL from Windows to Linux undergoing verification
+
+
+27/09/2027
+
+added folder Linux version
+
+added folder docx with index of site ForestPPL
+
+added file CompareWindowsLinux.txt
+
+screen output performance in Windows version has been improved.
