@@ -1,4 +1,5 @@
 ForestPPL is continue of project Forest.
+Use htmlpreview.github.io for opening file .html as web-page
 
 What's new:
 
