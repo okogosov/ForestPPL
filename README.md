@@ -31,7 +31,7 @@ fixed bug - execution of command calc under checksyntax yes
 successfully porting ForestPPL from Windows to Linux undergoing verification
 
 
-27/09/2027
+27/09/2026
 
 added folder Linux version
 
@@ -40,3 +40,16 @@ added folder docx with index of site ForestPPL
 added file CompareWindowsLinux.txt
 
 screen output performance in Windows version has been improved.
+
+
+04/10/2026
+
+added new command Storage.PushRow into library Storage with detailed explanations and numerous samples
+
+added checksyntax-internals  in Tutorial explanations
+
+improved Error detection
+
+updated docs, reference, vsix and executable files for Windows and Linux 
+
+
