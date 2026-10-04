@@ -46,12 +46,12 @@ screen output performance in Windows version has been improved.
 
 added new version v.2.0.0.4:
 
-  -new command Storage.PushRow into library Storage with detailed explanations and numerous samples
+     -new command Storage.PushRow into library Storage with detailed explanations and numerous samples
 
-  -checksyntax-internals  in Tutorial explanations
+     -checksyntax-internals  in Tutorial explanations
 
-  -improved Error detection
+     -improved Error detection
 
-  -updated docs, reference, vsix and executable files for Windows and Linux 
+     -updated docs, reference, vsix and executable files for Windows and Linux 
 
 
