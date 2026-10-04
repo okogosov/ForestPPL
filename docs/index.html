@@ -434,7 +434,7 @@ write(N1._x);   // Error: [GetValue] [N1._x] private object, no access</code></p
 
     <div class="panel" role="tabpanel" id="p-stor" aria-labelledby="t-stor" hidden>
       <h3>Storage: multidimensional and jagged arrays</h3>
-      <p>Storage holds data of any dimension, including rows of different lengths. Work with it through <code>sget</code>, <code>sset</code>, <code>swrite</code>, <code>sinfo</code>, <code>sresize</code> and the <code>StorageLib</code> library, which adds sorting, median, <code>Unique</code> and <code>Shuffle</code>.</p>
+      <p>Storage holds data of any dimension, including rows of different lengths. Work with it through <code>sget</code>, <code>sset</code>, <code>swrite</code>, <code>sinfo</code>, <code>sresize</code> and the <code>StorageLib</code> library, which adds sorting, median, <code>Unique</code>, <code>Shuffle</code> and <code>PushRow</code>.</p>
       <div class="pair">
         <div class="code"><span class="badge scr">scr</span><pre><code class="hl">storage s[2,2];
 s[0,0] = "left top";
@@ -444,6 +444,15 @@ sset (stor)(0)(0)("var (x)(0);d")
 eval (sget(stor)(0)(0))</code></pre></div>
       </div>
       <p>Save data to disk and restore it with <code>savedata</code> and <code>readdata</code>.</p>
+      <h3>StorageLib: indices pick the level</h3>
+      <p>Every StorageLib function counts its own parameters from the right; the parentheses before them are indices. The same call therefore works on the whole array, a slice or a row. For a 2&times;3&times;2 array holding 1..12:</p>
+      <div class="code"><span class="badge scr">scr</span><pre><code class="hl">storage s;
+storage.ReadFile(s)("test_nd.csv")(",");
+storage.Sum(s)(res);           // 78  whole array
+storage.Sum(s)(1)(res);        // 57  slice s[1]
+storage.Sum("s[1][2]")(res);   // 23  row s[1][2] = 11 + 12
+storage.PushRow(s)(0);         // adds a zero-filled row to slice 0</code></pre></div>
+      <p>Statistics add up every number below the chosen node and skip text; Push, Pop, Sort and similar functions need the indices to reach a row. See the <a href="reference.html">reference</a> for the rules.</p>
     </div>
 
     <div class="panel" role="tabpanel" id="p-lib" aria-labelledby="t-lib" hidden>
@@ -627,7 +636,7 @@ stop("test duration:");   // test duration: 0.7918 msec</code></pre></div>
     ["Vector",10,"Fast one-dimensional typed vectors.","Create Get Set Sort",0],
     ["Matrix",11,"Fast two-dimensional typed matrices with rotate and sort.","AddArrayToRow Rotate",0],
     ["DataFrame",40,"Table with named columns: select, sort, read and save.","SelectRows Sort ReadFile Save",0],
-    ["StorageLib",31,"Operations on storage: statistics, search, Join/Split, Unique, Shuffle.","Median Unique Join Sort",0]
+    ["StorageLib",32,"Works on whole N-D storage, a sub-array or a row: statistics, search, Join/Split, Sort, Unique, PushRow.","Sum PushRow Sort Median",0]
   ];
   document.getElementById('libgrid').innerHTML=libs.map(([n,c,d,f,def])=>`<article class="lib${def?' default':''}"><header><h3>${n}</h3><span class="n">${c}</span></header>${def?'<span class="def">loaded by default</span>':''}<p>${d}</p><div class="fns">${f.split(' ').join(' · ')}</div></article>`).join('');
 
