@@ -50,6 +50,21 @@ added new version v.2.0.0.4:
 
    ---checksyntax-internals  in Tutorial explanations
 
+
+12/10/2026
+
+added new version v.2.0.0.5 (except ForestPPL_Linux)
+
+   ForestPPL_SFX.exe, docs, ForestPPL-vscode, ForestPPL_Reference.index.html
+   
+added new Libraries - NumPPL, Requests
+
+added ForestPPL Overview.html
+
+added sources for libraries: Requests, NumPPL, StorageLib
+
+improved Error diagnostics 
+
    ---improved Error detection
 
    ---updated docs, reference, vsix and executable files for Windows and Linux 
