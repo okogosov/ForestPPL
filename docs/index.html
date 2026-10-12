@@ -270,7 +270,7 @@ loop (i)( + ( begin )( 1 ) )( + ( end )( 1 ) )( 1 )
   <div class="facts">
     <div><b>Two notations</b><span>C-like scr and prefix ppl, freely mixed in one file</span></div>
     <div><b>No dependencies</b><span>Plain C++ console app, core engine in PPL.DLL</span></div>
-    <div><b>14 libraries</b><span>From Math and String to DataFrame and StorageLib</span></div>
+    <div><b>16 libraries</b><span>From Math and String to StorageLib, Requests and NumPPL</span></div>
     <div><b>MIT</b><span>Open source, VS Code extension included</span></div>
   </div>
 </header>
@@ -564,7 +564,7 @@ stop("test duration:");   // test duration: 0.7918 msec</code></pre></div>
     <div class="plat">
       <div><span class="pill ok">ready</span><span><b>Windows</b> — primary platform, built with MS Developer Studio</span></div>
       <div><span class="pill wip">verifying</span><span><b>Linux</b> — port complete, being verified against the test scripts</span></div>
-      <div><span class="pill ok">0.3.0</span><span><b>VS Code</b> — extension for .scr and .ppl files</span></div>
+      <div><span class="pill ok">0.5.0</span><span><b>VS Code</b> — extension for .scr and .ppl files</span></div>
     </div>
     <div>
       <h3 style="margin-bottom:12px">New in ForestPPL</h3>
@@ -576,6 +576,7 @@ stop("test duration:");   // test duration: 0.7918 msec</code></pre></div>
         <li>Syntax checking before execution with <code>checksyntax</code></li>
         <li>No more limits on index calculation and parameter passing</li>
         <li>New API for external libraries and an HTML reference</li>
+        <li>New libraries: Requests (HTTP client) and NumPPL (NumPy-style arrays)</li>
       </ul>
     </div>
   </div>
@@ -636,7 +637,9 @@ stop("test duration:");   // test duration: 0.7918 msec</code></pre></div>
     ["Vector",10,"Fast one-dimensional typed vectors.","Create Get Set Sort",0],
     ["Matrix",11,"Fast two-dimensional typed matrices with rotate and sort.","AddArrayToRow Rotate",0],
     ["DataFrame",40,"Table with named columns: select, sort, read and save.","SelectRows Sort ReadFile Save",0],
-    ["StorageLib",32,"Works on whole N-D storage, a sub-array or a row: statistics, search, Join/Split, Sort, Unique, PushRow.","Sum PushRow Sort Median",0]
+    ["StorageLib",32,"Works on whole N-D storage, a sub-array or a row: statistics, search, Join/Split, Sort, Unique, PushRow.","Sum PushRow Sort Median",0],
+    ["Requests",31,"HTTP client on libcurl: GET, POST, JSON, headers, authentication, file download.","Get PostJson JsonGet Download",0],
+    ["NumPPL",27,"NumPy-style functions on storages: shapes, broadcasting, statistics, linear algebra.","Arange Reshape Dot Solve",0]
   ];
   document.getElementById('libgrid').innerHTML=libs.map(([n,c,d,f,def])=>`<article class="lib${def?' default':''}"><header><h3>${n}</h3><span class="n">${c}</span></header>${def?'<span class="def">loaded by default</span>':''}<p>${d}</p><div class="fns">${f.split(' ').join(' · ')}</div></article>`).join('');
 
